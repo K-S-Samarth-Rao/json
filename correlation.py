@@ -48,3 +48,22 @@ def compute_correlations(file:str)->dict:
                events_dict[j] = compute_phi(file,j)
     return events_dict
     
+def diagnose(file: str)->dict:
+    events_dict = computer_correlations(file)
+    event = []
+    
+    max,min = -999,999
+    high,low = "",""
+    
+    for i in events_dict:
+        if(events_dict[i]<min):
+            min = events_dict[i]
+            low = i
+        elif(events_dict[i]>max):
+            max = events_dict[i]
+            high = i
+             
+    event.append(high)
+    event.append(low)
+    
+    return event  
