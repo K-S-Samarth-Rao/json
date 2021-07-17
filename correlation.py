@@ -1,7 +1,7 @@
 # Add the functions in this file
 
 import json
-D=dict()
+d=dict()
 
 def load_journal(fname):
   f=open(fname)
@@ -11,7 +11,10 @@ def load_journal(fname):
 
 def compute_phi(fname,k):
    f=load_journal(fname)
-   n00,n01,n10,n11=0
+   n00=0
+   n01=0
+   n10=0
+   n11=0
    for i in f:
      if i['squirrel']==False and k in i['events']:
        n01=n01+1
@@ -23,21 +26,21 @@ def compute_phi(fname,k):
        n10=n10+1
   
    
-   n_0=n00+n01
-   n_1=n11+n10
-   n0_=n00+n10
-   n1_=n11+n01
+   n0=n00+n01
+   n1=n11+n10
+   k0=n00+n10
+   k1=n11+n01
    
-   correlation = ((n11 *n00) -(n10* n01)) / ((n_1*n_0*n1_*n0_)**(0.5))
-   return correlation
+   p= ((n11 *n00) -(n10* n01)) / ((n1*n0*k1*k0)**(0.5))
+   return p
 
 
 def compute_correlations(fname):
   f=load_journal(fname)
   for i in f:
    for j in i['events']:
-     D[j]=compute_phi(fname,j)
-  return D
+     d[j]=compute_phi(fname,j)
+  return d
         
 
 
