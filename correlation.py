@@ -1,69 +1,55 @@
 # Add the functions in this file
 
 import json
+D=dict()
 
-def load_journal(file:str)->dict:
-    f=open(file,"r")
-    return json.load(f)
-    
-def compute_phi(file:str, event:str)->float:
-    journal=load_journal(file)
-    correlation = 0.0
-    n00 = n01 = n10 = n11 = 0
-    n_0 = n0_ = n_1 = n1_ = 0
-    
-    for i in range(len(journal)):
-        squirrel = dict(journal[i])['squirrel']
-        events = dict(journal[i])['events']
+def load_journal(fname):
+  f=open(fname)
+  data=json.load(f)
+  return data
+      
+
+def compute_phi(fname,k):
+   f=load_journal(fname)
+   n00,n01,n10,n11=0
+   for i in f:
+     if i['squirrel']==False and k in i['events']:
+       n01=n01+1
+     elif i['squirrel']==False and k not in i['events']:
+       n00=n00+1
+     elif i['squirrel']==True and k in i['events']:
+       n11=n11+1
+     elif i['squirrel']==True and k not in i['events']:
+       n10=n10+1
+  
+   
+   n_0=n00+n01
+   n_1=n11+n10
+   n0_=n00+n10
+   n1_=n11+n01
+   
+   correlation = ((n11 *n00) -(n10* n01)) / ((n_1*n_0*n1_*n0_)**(0.5))
+   return correlation
+
+
+def compute_correlations(fname):
+  f=load_journal(fname)
+  for i in f:
+   for j in i['events']:
+     D[j]=compute_phi(fname,j)
+  return D
         
-        if squirrel == True:
-            n_1 += 1
-        else:
-            n_0 += 1
-              
-        if event in events:
-            n1_ += 1
-            if squirrel:
-               n11 += 1
-            else:
-               n10 += 1
-        else:
-             n0_ += 1
-             if squirrel:
-                 n01 += 1
-             else:
-                 n00 += 1
-                  
-     correlation = (n11 * n00 - n01 * n10)/((n_1 * n_0 * n0_ * n1_)**0.5)
-     return correlation
-     
-def compute_correlations(file:str)->dict:
-    journal = load_journal(file)
-    events_dict = {}
-    
-    for i in range(len(journal)):
-        events = journal[i]["events"]
-        for j in events:
-            if j not in events_dict:
-               events_dict[j] = compute_phi(file,j)
-    return events_dict
-    
-def diagnose(file: str)->dict:
-    events_dict = computer_correlations(file)
-    event = []
-    
-    max,min = -999,999
-    high,low = "",""
-    
-    for i in events_dict:
-        if(events_dict[i]<min):
-            min = events_dict[i]
-            low = i
-        elif(events_dict[i]>max):
-            max = events_dict[i]
-            high = i
-             
-    event.append(high)
-    event.append(low)
-    
-    return event  
+
+
+def diagnose(fname):
+  m=compute_correlations(fname)
+  maximum=-1
+  minimum=1
+  for i in m:
+    if m[i]>maximum:
+       maximum=m[i]
+       mm=i
+    if m[i]<minimum:
+       minimum=m[i]
+       mn=i
+  return(mm,mn)
